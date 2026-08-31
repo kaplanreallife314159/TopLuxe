@@ -15,7 +15,8 @@ import { getSessionService } from '@/modules/identity/services/factory';
  */
 async function handler(req:Request): Promise<Response> {
   const env = getEnv();
-  const rawToken = (await cookies().get(env.SESSION_COOKIE_NAME)?.value;
+  const cookieStore = await cookies();
+  const rawToken = cookieStore.get(env.SESSION_COOKIE_NAME)?.value;
 
   if (rawToken) {
     const sessionService = getSessionService();
