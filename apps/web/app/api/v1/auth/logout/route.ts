@@ -1,3 +1,4 @@
+import {cookies} from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getEnv } from '@/shared/config/env';
 import { withErrorHandling } from '@/shared/middleware/errorHandler';
@@ -14,7 +15,7 @@ import { getSessionService } from '@/modules/identity/services/factory';
  */
 async function handler(req:Request): Promise<Response> {
   const env = getEnv();
-  const rawToken = req.cookies.get(env.SESSION_COOKIE_NAME)?.value;
+  const rawToken = cookies().get(env.SESSION_COOKIE_NAME)?.value;
 
   if (rawToken) {
     const sessionService = getSessionService();
