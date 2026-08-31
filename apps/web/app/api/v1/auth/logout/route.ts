@@ -12,7 +12,7 @@ import { getSessionService } from '@/modules/identity/services/factory';
  * Idempotent : que le cookie soit présent/valide ou non, la réponse est toujours 204 et le
  * cookie est toujours effacé côté client.
  */
-async function handler(req: Request): Promise<Response> {
+async function handler(req: NextRequest): Promise<Response> {
   const env = getEnv();
   const rawToken = req.cookies.get(env.SESSION_COOKIE_NAME)?.value;
 
