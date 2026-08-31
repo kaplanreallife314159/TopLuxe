@@ -17,7 +17,7 @@ import { piLoginRequestSchema } from '@/modules/identity/validations/piAuth';
  * même d'atteindre le service. La seule source d'identité utilisée est la validation serveur de
  * l'accessToken auprès de la Pi Platform (GET /v2/me), effectuée par AuthenticationService.
  */
-async function handler(req: Request): Promise<Response> {
+async function handler(req: NextRequest): Promise<Response> {
   const rawBody: unknown = await req.json().catch(() => {
     throw new ValidationError('Corps de requête JSON invalide.');
   });
