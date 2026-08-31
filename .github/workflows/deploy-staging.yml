@@ -1,0 +1,20 @@
+name: Deploy to Staging
+
+# NON CONFIRMÉ / À COMPLÉTER : ce workflow est un squelette. Le déclencheur exact, la stratégie
+# de déploiement Render (build hook, Docker, ou intégration Git native Render) et les secrets
+# nécessaires doivent être définis lors de la validation finale du déploiement (cf. document
+# Sprint 0, section J — "aucun déploiement n'est effectué à ce stade").
+
+on:
+  workflow_dispatch: {}
+  # push:
+  #   branches: [develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder — déploiement non configuré
+        run: |
+          echo "Ce workflow est un squelette. La stratégie de déploiement Render doit être validée avant activation."
+          echo "Voir docs/architecture pour le document Sprint 0, section J."
