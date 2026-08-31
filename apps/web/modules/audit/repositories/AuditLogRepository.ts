@@ -15,7 +15,7 @@ export class AuditLogRepository {
         // reflète correctement ce que l'API accepte, contrairement à un cast "as never" (corrigé
         // lors de l'audit TLX-001.1, P1 — un cast "as never" masquait silencieusement toute
         // erreur de type réelle sur ce champ).
-        details: (entry.details ?? undefined) as Prisma.InputJsonValue | undefined,
+        details: (entry.details ?? undefined) as Prisma.JsonValue | undefined,
       },
     });
   }
