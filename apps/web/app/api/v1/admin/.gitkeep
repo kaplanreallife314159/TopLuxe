@@ -1,0 +1,3 @@
+Emplacement architectural réservé (module Identité). Aucune route n'est implémentée par
+TLX-001 : l'authentification Pi (POST /api/v1/auth/pi-login) est développée dans un ticket
+séparé, conformément à la consigne explicite de ce ticket.

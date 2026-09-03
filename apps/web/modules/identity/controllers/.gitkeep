@@ -1,0 +1,4 @@
+Ce dossier accueillera les contrôleurs du module Identité (ex. gestion du profil /users/me,
+suspension/réactivation admin) au fur et à mesure des tickets du backlog (TLX-006 à TLX-008).
+Aucun contrôleur n'est créé par TLX-001 : la fondation (session, repositories, types) suffit
+pour ce ticket, conformément à la consigne de ne pas développer l'authentification Pi ici.

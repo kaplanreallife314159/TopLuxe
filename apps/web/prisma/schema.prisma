@@ -1,0 +1,103 @@
+// TopLuxe — Schéma Prisma (fondation, TLX-001)
+//
+// Uniquement les modèles de fondation validés au Sprint 0 : User, Role, UserRole, Session,
+// AuditLog. Aucune table métier (produits, commandes, paiements, escrow, KYC, litiges, etc.)
+// n'est créée à ce stade, conformément à la décision "base de données minimale" du document
+// Sprint 0 (section G). Ces modèles sont ceux déjà spécifiés dans le document
+// "TopLuxe — Spécifications Techniques Détaillées & Backlog MVP", sections 1.5 et 2.5,
+// retranscrits ici SANS modification.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserStatus {
+  active
+  pending_verification
+  suspended
+  banned
+}
+
+enum RoleCode {
+  buyer
+  seller_individual
+  seller_pro
+  expert
+  moderator
+  admin
+}
+
+model User {
+  id          String     @id @default(uuid())
+  piUid       String     @unique @map("pi_uid")
+  piUsername  String     @map("pi_username")
+  email       String?    @unique
+  status      UserStatus @default(active)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  lastLoginAt DateTime?  @map("last_login_at")
+
+  userRoles UserRole[]
+  sessions  Session[]
+
+  @@index([status])
+  @@map("users")
+}
+
+model Role {
+  id   String   @id @default(uuid())
+  code RoleCode @unique
+
+  userRoles UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  grantedAt DateTime @default(now()) @map("granted_at")
+  grantedBy String?  @map("granted_by")
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@map("user_roles")
+}
+
+model Session {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  createdAt DateTime  @default(now()) @map("created_at")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?  @map("actor_user_id")
+  actionCode  String   @map("action_code")
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

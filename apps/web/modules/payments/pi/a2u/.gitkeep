@@ -1,0 +1,4 @@
+Emplacement architectural réservé, conforme au document Sprint 0 (section B) et à la consigne
+explicite du ticket TLX-001 : "Ne développe PAS encore les paiements Pi, U2A, A2U ou escrow."
+Ce dossier reste intentionnellement vide de toute logique jusqu'au ticket dédié, une fois
+l'architecture des paiements Pi validée séparément avec la documentation officielle.

@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ATTENTION (corrigé lors de l'audit TLX-001.1, P0) : `npm ci` exige un package-lock.json
+      # déjà présent et cohérent avec les package.json. Aucun lockfile n'a pu être généré dans
+      # l'environnement ayant créé cette fondation (accès réseau au registre npm bloqué — voir
+      # rapport TLX-001, section J). Avec `npm ci`, cette étape échouait à coup sûr dès le
+      # premier commit. `npm install` est utilisé ici comme mesure temporaire : il génère et
+      # committe implicitement un package-lock.json lors de la première exécution locale par un
+      # développeur. Ce workflow DOIT repasser à `npm ci` dès qu'un package-lock.json réel est
+      # committé au dépôt (build reproductible garanti).
+      - name: Install dependencies
+        run: npm install
+        working-directory: .
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit & integration tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Valeurs factices non sensibles, uniquement pour permettre au build de s'exécuter en CI.
+          # Aucune valeur réelle n'est utilisée ici.
+          DATABASE_URL: 'postgresql://ci:ci@localhost:5432/ci_placeholder'
+          SESSION_TOKEN_PEPPER: 'ci-placeholder-pepper'
+          NEXT_PUBLIC_PI_SANDBOX_MODE: 'true'
+          NEXT_PUBLIC_APP_ENV: 'ci'
+
+  # Étape E2E désactivée tant que l'environnement de staging n'est pas prêt (cf. Sprint 0, section I).
+  # e2e:
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-test
+  #   steps: []

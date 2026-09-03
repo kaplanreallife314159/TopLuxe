@@ -1,0 +1,36 @@
+databases:
+  - name: topluxe-db
+    plan: starter
+    region: frankfurt
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: topluxe-web
+    runtime: node
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_ENV
+        value: production
+      - key: NEXT_PUBLIC_PI_SANDBOX_MODE
+        value: "false"
+      - key: SESSION_COOKIE_NAME
+        value: topluxe_session
+      - key: SESSION_TOKEN_PEPPER
+        generateValue: true
+      - key: LOG_LEVEL
+        value: info
+      - key: DATABASE_URL
+        fromDatabase:
+          name: topluxe-db
+          property: connectionString
