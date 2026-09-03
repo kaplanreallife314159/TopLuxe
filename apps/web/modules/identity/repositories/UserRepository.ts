@@ -1,7 +1,14 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
 import type { VerifiedPiIdentity } from '@/modules/identity/types/session';
 
-Prisma.UserGetPayload<{ include: { userRoles: { include: { role: true } } } }>
+type UserWithRoles = Prisma.UserGetPayload<{
+  include: {
+    userRoles: {
+      include: {
+        role: true
+      }
+    }
+  }
 }>;
 
 /**
