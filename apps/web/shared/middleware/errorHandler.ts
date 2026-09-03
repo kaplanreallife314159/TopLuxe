@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { isAppError } from '@/shared/errors/AppError';
 import { logger } from '@/shared/logger/logger';
 
@@ -13,14 +13,18 @@ import { logger } from '@/shared/logger/logger';
  * Conforme au ticket TLX-001, point 11. Ne contient aucune règle métier.
  */
 export function withErrorHandling(
-  handler: (req: Request) => Promise<Response>,
-): (req: Request) => Promise<Response> {
-  return async (req: Request) => {
+  handler: (req: NextRequest) => Promise<Response>,
+): (req: NextRequest) => Promise<Response> {
+  return async (req: NextRequest) => {
     try {
       return await handler(req);
     } catch (error) {
       if (isAppError(error)) {
-        logger.warn({ code: error.code, details: error.details }, error.message);
+        logger.warn(
+          { code: error.code, details: error.details },
+          error.message,
+        );
+
         return NextResponse.json(
           { error: { code: error.code, message: error.message } },
           { status: error.statusCode },
@@ -28,8 +32,14 @@ export function withErrorHandling(
       }
 
       logger.error({ err: error }, 'Erreur interne non gérée');
+
       return NextResponse.json(
-        { error: { code: 'INTERNAL_ERROR', message: 'Une erreur interne est survenue.' } },
+        {
+          error: {
+            code: 'INTERNAL_ERROR',
+            message: 'Une erreur interne est survenue.',
+          },
+        },
         { status: 500 },
       );
     }
