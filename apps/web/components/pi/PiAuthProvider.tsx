@@ -1,3 +1,4 @@
+PiAuthProvider.tsx
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
@@ -19,8 +20,6 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
 
 export function usePiAuth() {
   const context = useContext(PiAuthContext);
-  if (!context) {
-    throw new Error('usePiAuth must be used within PiAuthProvider');
-  }
+  if (!context) throw new Error('usePiAuth must be used within PiAuthProvider');
   return context;
 }
