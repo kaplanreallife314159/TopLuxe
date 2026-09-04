@@ -1,15 +1,15 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
 import type { VerifiedPiIdentity } from '@/modules/identity/types/session';
 
-type UserWithRoles = Prisma.UserGetPayload<{
-  include: {
-    userRoles: {
-      include: {
-        role: true
-      }
-    }
-  }
-}>;
+  type UserWithRoles = Prisma.UserGetPayload<Prisma.UserFindUniqueArgs & {
+    include: {
+      userRoles: {
+        include: {
+          role: true
+        }
+     }
+   }
+ }>;
 
 /**
  * Accès aux données utilisateur — TopLuxe.
