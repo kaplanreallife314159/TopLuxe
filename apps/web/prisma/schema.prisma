@@ -6,15 +6,15 @@
 // Sprint 0 (section G). Ces modèles sont ceux déjà spécifiés dans le document
 // "TopLuxe — Spécifications Techniques Détaillées & Backlog MVP", sections 1.5 et 2.5,
 // retranscrits ici SANS modification.
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
+10 datasource db {
+11   provider = "postgresql"
+12   url      = env("DATABASE_URL")
+13 }
+14
+15 generator client {
+16   provider = "prisma-client-js"
+17   output   = "./generated/prisma-client"
+18 }
 
 enum UserStatus {
   active
