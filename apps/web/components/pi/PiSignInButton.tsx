@@ -1,48 +1,91 @@
 'use client';
 
-import { usePiAuthContext } from '@/components/pi/PiAuthContext';
+import { useState } from 'react';
 
-/**
- * Bouton de connexion manuelle — TLX-006 (exigence explicite : la connexion automatique au
- * chargement ne dispense pas de fournir un déclenchement manuel visible).
- *
- * Le libellé reflète l'état réel plutôt que de prétendre à des états non observables (voir la
- * limitation documentée dans PiAuthProvider.tsx concernant l'absence de signal d'annulation
- * explicite lors du rejet de la promesse window.Pi.authenticate()).
- */
 export function PiSignInButton() {
-  const { ready, piConnected, backendState, backendErrorMessage, piDisplayUsername, retry } =
-    usePiAuthContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (backendState === 'authenticated') {
-    return (
-      <span data-testid="pi-auth-status">
-        Connecté{piDisplayUsername ? ` en tant que ${piDisplayUsername}` : ''}
-      </span>
-    );
-  }
+  const handlePiLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  const label = (() => {
-    if (!ready) return 'Initialisation de Pi…';
-    if (backendState === 'submitting') return 'Connexion en cours…';
-    if (piConnected && backendState === 'backend_error') return 'Réessayer';
-    return 'Se connecter avec Pi';
-  })();
+      // Vérifier si Pi SDK est disponible
+      if (!window.Pi) {
+        setError('Pi SDK not available. Please refresh the page.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Initialiser Pi SDK
+      await window.Pi.init({ version: '2.0' });
+
+      // Récupérer l'authentification
+      const auth = await window.Pi.authenticate();
+
+      if (auth?.accessToken) {
+        // Envoyer le token au backend
+        const response = await fetch('/api/auth/pi-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            accessToken: auth.accessToken,
+          }),
+        });
+
+        if (response.ok) {
+          // Rediriger vers dashboard
+          window.location.href = '/dashboard';
+        } else {
+          const data = await response.json();
+          setError(data.message || 'Login failed');
+        }
+      } else {
+        setError('Failed to get access token from Pi');
+      }
+    } catch (err) {
+      console.error('Pi login error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div>
+    <div style={{ marginTop: '2rem' }}>
       <button
-        type="button"
-        data-testid="pi-sign-in-button"
-        disabled={!ready || backendState === 'submitting'}
-        onClick={retry}
+        onClick={handlePiLogin}
+        disabled={isLoading}
+        style={{
+          padding: '12px 24px',
+          fontSize: '16px',
+          backgroundColor: '#6C63FF',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: isLoading ? 'not-allowed' : 'pointer',
+          opacity: isLoading ? 0.6 : 1,
+        }}
       >
-        {label}
+        {isLoading ? 'Connexion en cours...' : 'Se connecter avec Pi'}
       </button>
-      {backendState === 'backend_error' && backendErrorMessage && (
-        <p role="alert" data-testid="pi-auth-error">
-          {backendErrorMessage}
-        </p>
+
+      {error && (
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '1rem',
+            backgroundColor: '#ffebee',
+            color: '#c62828',
+            borderRadius: '4px',
+            fontSize: '14px',
+          }}
+        >
+          <strong>Erreur :</strong> {error}
+        </div>
       )}
     </div>
   );
